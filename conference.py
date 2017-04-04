@@ -24,6 +24,7 @@ from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 
+from models import Person
 from models import Topic
 from models import ConflictException
 from models import Profile
@@ -89,12 +90,17 @@ CONF_POST_REQUEST = endpoints.ResourceContainer(
 
 class Tag(ndb.Model):
     title = ndb.StringProperty(required=True)
-    url = ndb.StringProperty()
+    url = ndb.StringProperty(indexed=False)
     count = ndb.IntegerProperty(default=0)
+    counting = ndb.IntegerProperty(default=0)
 
     @property
     def tasks(self):
         return Task.query(Task.tag == self.key)
+
+    @property
+    def topics(self):
+        return Topic.gql("WHERE tags = :1", self.key)
 
 class Task(ndb.Model):
     tag = ndb.KeyProperty(kind=Tag)
@@ -107,8 +113,8 @@ class TagForm(messages.Message):
     count = messages.IntegerField(3)
 
 class TaskForm(messages.Message):
-    title = ndb.StringField(1)
-    email = ndb.StringField(2)
+    title = messages.StringField(1)
+    email = messages.StringField(2)
 
 @endpoints.api(name='conference', version='v1', audiences=[ANDROID_AUDIENCE],
     allowed_client_ids=[WEB_CLIENT_ID, API_EXPLORER_CLIENT_ID, ANDROID_CLIENT_ID, IOS_CLIENT_ID],
@@ -234,19 +240,38 @@ class ConferenceApi(remote.Service):
         tag_key = ndb.Key(Tag, request.title)
         tag = Tag(key = tag_key,
                   title = request.title)
+        if request.count:
+            tag.count = request.count
         tag.put()
-        return TagForm(title=request.title)
-
-
+        got = tag_key.get()
+        return TagForm(title=got.title, count=got.count)
+    """
+    @ndb.transactional(xg=True)
+    def addTaskTopic(self, task):
+        task.put()
+        taskqueue.add(params={'tag': request.title}, url='tasks/collect_topic_tag', transactional=True)
+    """
     @endpoints.method(TaskForm, TaskForm, path='task/add',
         http_method='POST', name='addTask')
     def addTask(self, request):
         tag_key = ndb.Key(Tag, request.title)
+        """ self-implementing without transaction
+        tag = tag_key.get()
+        if not tag:
+            tag = Tag(key = tag_key,
+                      title = request.title)
+            tag.put()
+        """
+        tag = Tag.get_or_insert(request.title,
+                          key = tag_key,
+                          title = request.title)
         user = endpoints.get_current_user()
+        email = user.email()
         task = Task(tag = tag_key,
-                    email = user.email)
+                    email = email)
         task.put()
-        return TaskForm(title=request.title, email=user.email)
+        # addTaskTopic(task)
+        return TaskForm(title=request.title, email=email)
 
 
     @endpoints.method(ConferenceForm, ConferenceForm, path='conference',
