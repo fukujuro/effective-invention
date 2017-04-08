@@ -10,87 +10,122 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-- kind: Conference
+- kind: TopicSnapshot
   properties:
-  - name: city
-  - name: maxAttendees
-  - name: month
-  - name: name
+  - name: task
+  - name: time
+  
+- kind: TopicSnapshot
+  properties:
+  - name: task
+  - name: time
+    direction: desc
 
-- kind: Conference
+- kind: Topic
   properties:
-  - name: city
-  - name: maxAttendees
-  - name: month
-  - name: topics
-  - name: name
+  - name: tags
+  - name: vote
+    direction: desc
+    
+- kind: Topic
+  properties:
+  - name: tags
+  - name: comment
+    direction: desc
+  
+- kind: Topic
+  properties:
+  - name: author
+  - name: vote
+    direction: desc
+    
+- kind: Topic
+  properties:
+  - name: author
+  - name: comment
+    direction: desc
+    
+# - kind: Conference
+  # properties:
+  # - name: city
+  # - name: maxAttendees
+  # - name: month
+  # - name: name
 
-- kind: Conference
-  properties:
-  - name: city
-  - name: maxAttendees
-  - name: name
+# - kind: Conference
+  # properties:
+  # - name: city
+  # - name: maxAttendees
+  # - name: month
+  # - name: topics
+  # - name: name
 
-- kind: Conference
-  properties:
-  - name: city
-  - name: month
-  - name: name
+# - kind: Conference
+  # properties:
+  # - name: city
+  # - name: maxAttendees
+  # - name: name
 
-- kind: Conference
-  properties:
-  - name: city
-  - name: month
-  - name: topics
-  - name: name
+# - kind: Conference
+  # properties:
+  # - name: city
+  # - name: month
+  # - name: name
 
-- kind: Conference
-  properties:
-  - name: city
-  - name: name
+# - kind: Conference
+  # properties:
+  # - name: city
+  # - name: month
+  # - name: topics
+  # - name: name
 
-- kind: Conference
-  properties:
-  - name: city
-  - name: topics
-  - name: name
+# - kind: Conference
+  # properties:
+  # - name: city
+  # - name: name
 
-- kind: Conference
-  properties:
-  - name: maxAttendees
-  - name: month
-  - name: name
+# - kind: Conference
+  # properties:
+  # - name: city
+  # - name: topics
+  # - name: name
 
-- kind: Conference
-  properties:
-  - name: maxAttendees
-  - name: month
-  - name: topics
-  - name: name
+# - kind: Conference
+  # properties:
+  # - name: maxAttendees
+  # - name: month
+  # - name: name
 
-- kind: Conference
-  properties:
-  - name: maxAttendees
-  - name: name
+# - kind: Conference
+  # properties:
+  # - name: maxAttendees
+  # - name: month
+  # - name: topics
+  # - name: name
 
-- kind: Conference
-  properties:
-  - name: maxAttendees
-  - name: topics
-  - name: name
+# - kind: Conference
+  # properties:
+  # - name: maxAttendees
+  # - name: name
 
-- kind: Conference
-  properties:
-  - name: month
-  - name: name
+# - kind: Conference
+  # properties:
+  # - name: maxAttendees
+  # - name: topics
+  # - name: name
 
-- kind: Conference
-  properties:
-  - name: month
-  - name: topics
-  - name: name
+# - kind: Conference
+  # properties:
+  # - name: month
+  # - name: name
 
-- kind: Conference
-  properties:
-  - name: topics
-  - name: name
+# - kind: Conference
+  # properties:
+  # - name: month
+  # - name: topics
+  # - name: name
+
+# - kind: Conference
+  # properties:
+  # - name: topics
+  # - name: name

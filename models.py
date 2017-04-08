@@ -17,26 +17,35 @@ import endpoints
 from protorpc import messages
 from google.appengine.ext import ndb
 
-class Post(ndb.Model):
-	vote = ndb.IntegerProperty(default=0)
-	author = ndb.KeyProperty(kind=Person)
-	utime = ndb.DateTimeProperty()
-	
-class Topic(Post):
-	_id = ndb.IntegerProperty(required=True)
-	comments = ndb.IntegerProperty(default=0)
-	disp_topic = ndb.StringProperty()
-	topic_type = ndb.StringProperty()
-	tags = ndb.KeyProperty(repeated=True)
-	
-	@property
-	def comments(self):
-		return Comment.query(Comment.topic == self.key)
-		
-	@property
-	def tasks(self):
-		return TaskTopic.query(TaskTopic.topic == self.key)
-		
+class Person(ndb.Model):
+    name = ndb.StringProperty(required=True)
+
+    @property
+    def topics(self):
+        return Topic.query(Topic.author == self.key)
+
+    @property
+    def comments(self):
+        return Comment.query(Comment.author == self.key)
+
+class Topic(ndb.Model):
+    top_id = ndb.StringProperty(required=True)
+    vote = ndb.IntegerProperty(default=0)
+    comment = ndb.IntegerProperty(default=0)
+    author = ndb.StringProperty(required=True)
+    disp_topic = ndb.StringProperty(indexed=False)
+    topic_type = ndb.StringProperty(indexed=False)
+    utime = ndb.DateTimeProperty()
+    tags = ndb.KeyProperty(repeated=True)
+
+    @property
+    def comments(self):
+        return Comment.query(Comment.topic == self.key)
+
+    @property
+    def tasks(self):
+        return TaskTopic.query(TaskTopic.topic == self.key)
+
 class ConflictException(endpoints.ServiceException):
     """ConflictException -- exception mapped to HTTP 409 response"""
     http_status = httplib.CONFLICT

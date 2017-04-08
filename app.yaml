@@ -1,8 +1,14 @@
-application: test-helloworldendpoints
-version: 1
+# application: test-helloworldendpoints
+# version: 4
 runtime: python27
 api_version: 1
 threadsafe: yes
+basic_scaling:
+  max_instances: 2
+
+builtins:
+- appstats: on
+- remote_api: on
 
 handlers:       # static then dynamic
 
@@ -32,6 +38,9 @@ handlers:       # static then dynamic
 
 - url: /tasks/send_confirmation_email
   script: main.app
+  
+- url: /tasks/collect_topic_tag
+  script: main.app
 
 - url: /crons/set_announcement
   script: main.app
@@ -50,4 +59,7 @@ libraries:
 
 # pycrypto library used for OAuth2 (req'd for authenticated APIs)
 - name: pycrypto
+  version: latest
+
+- name: ssl
   version: latest

@@ -104,17 +104,22 @@ class Tag(ndb.Model):
 
 class Task(ndb.Model):
     tag = ndb.KeyProperty(kind=Tag)
-    time = ndb.DateTimeProperty(auto_now_add=True)
+    start = ndb.DateTimeProperty(auto_now_add=True)
+    end = ndb.DateTimeProperty(auto_now=True)
     email = ndb.StringProperty()
+    last_id = ndb.StringProperty(default='0')
+    counting = ndb.IntegerProperty(default=0)
 
 class TagForm(messages.Message):
     title = messages.StringField(1)
     url = messages.StringField(2)
     count = messages.IntegerField(3)
+    counting = messages.IntegerField(4)
 
 class TaskForm(messages.Message):
     title = messages.StringField(1)
     email = messages.StringField(2)
+    note = messages.StringField(3)
 
 @endpoints.api(name='conference', version='v1', audiences=[ANDROID_AUDIENCE],
     allowed_client_ids=[WEB_CLIENT_ID, API_EXPLORER_CLIENT_ID, ANDROID_CLIENT_ID, IOS_CLIENT_ID],
@@ -236,26 +241,46 @@ class ConferenceApi(remote.Service):
 
     @endpoints.method(TagForm, TagForm, path='tag/add',
         http_method='POST', name='addTag')
-    def addTag(self, request):
+    def mergeTag(self, request):
         tag_key = ndb.Key(Tag, request.title)
+        """ self-implement without transaction
         tag = Tag(key = tag_key,
                   title = request.title)
+        """
+        count = 0
         if request.count:
-            tag.count = request.count
-        tag.put()
-        got = tag_key.get()
-        return TagForm(title=got.title, count=got.count)
-    """
-    @ndb.transactional(xg=True)
-    def addTaskTopic(self, task):
+            count = request.count
+        counting = 0
+        if request.counting:
+            counting = request.counting
+        tag = Tag.get_or_insert(request.title,
+                                key = tag_key,
+                                title = request.title,
+                                count = count,
+                                counting = counting)
+        if tag.count < count or tag.counting < counting:
+            if tag.count < count:
+                tag.count = count
+            if tag.counting < counting:
+                tag.counting = counting
+            tag.put()
+        # got = tag_key.get()
+        return TagForm(title=tag.title, count=tag.count, counting=tag.counting)
+    """ transaction become bad, it deleted finished task but memory leak warning
+    @ndb.transactional()
+    def addTaskTopic(self, task, tag):
+        taskqueue.add(params={'tag': tag,
+                              'task_key': task.key.urlsafe()},
+                      url='/tasks/collect_topic_tag',
+                      transactional=True)
         task.put()
-        taskqueue.add(params={'tag': request.title}, url='tasks/collect_topic_tag', transactional=True)
+        return 'task added successfully'
     """
     @endpoints.method(TaskForm, TaskForm, path='task/add',
         http_method='POST', name='addTask')
     def addTask(self, request):
         tag_key = ndb.Key(Tag, request.title)
-        """ self-implementing without transaction
+        """ self-implement without transaction
         tag = tag_key.get()
         if not tag:
             tag = Tag(key = tag_key,
@@ -263,15 +288,25 @@ class ConferenceApi(remote.Service):
             tag.put()
         """
         tag = Tag.get_or_insert(request.title,
-                          key = tag_key,
-                          title = request.title)
+                                key = tag_key,
+                                title = request.title)
         user = endpoints.get_current_user()
         email = user.email()
-        task = Task(tag = tag_key,
+        """
+        parent_key = ndb.Key('TaskList','default')
+        """
+        task_id = Task.allocate_ids(size=1)[0]
+        task_key = ndb.Key(Task, task_id)
+        task = Task(key = task_key,
+                    tag = tag_key,
                     email = email)
-        task.put()
-        # addTaskTopic(task)
-        return TaskForm(title=request.title, email=email)
+        # note = self.addTaskTopic(task, request.title)
+        taskqueue.add(params={'tag': request.title,
+                              'task_key': task.key.urlsafe()},
+                      url='/tasks/collect_topic_tag',
+                      transactional=True)
+        task.put_async()
+        return TaskForm(title=request.title, email=email, note=note)
 
 
     @endpoints.method(ConferenceForm, ConferenceForm, path='conference',
