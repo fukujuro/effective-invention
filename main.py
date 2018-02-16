@@ -75,10 +75,10 @@ class CollectTopicTagHandler(webapp2.RequestHandler):
         last_id_mc_key = '{}:last_id'.format(task_id)
         counting_mc_key = '{}:counting'.format(task_id)
                 
-        counting = memcache.get(counting_mc_key)
-        if not counting:
-            counting = task.counting
-            memcache.set(counting_mc_key, counting)
+        # counting = memcache.get(counting_mc_key)
+        # if not counting:
+        counting = task.counting
+        #     memcache.set(counting_mc_key, counting)
 
         url = 'https://pantip.com/forum/topic/ajax_json_all_topic_tag'
         headers = {'User-Agent': 'grit.intelligence@gmail.com',
