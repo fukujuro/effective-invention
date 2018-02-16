@@ -77,7 +77,7 @@ class CollectTopicTagHandler(webapp2.RequestHandler):
                 
         # counting = memcache.get(counting_mc_key)
         # if not counting:
-        counting = task.counting
+        # counting = task.counting
         #     memcache.set(counting_mc_key, counting)
 
         url = 'https://pantip.com/forum/topic/ajax_json_all_topic_tag'
@@ -90,14 +90,14 @@ class CollectTopicTagHandler(webapp2.RequestHandler):
                     ('dataSend[topic_type][default_type]', '1'),
                     ('thumbnailview', 'false'),
                     ('current_page', '1')]
-        last_id = memcache.get(last_id_mc_key)
-        if last_id:
-            payload[0] = (payload[0][0], last_id)
-        else:
-            if task.last_id != '0':
-                memcache.set(tag, task.last_id)
-                payload[0] = (payload[0][0], task.last_id)
-        item = memcache.get(item_mc_key)
+        # last_id = memcache.get(last_id_mc_key)
+        # if last_id:
+        #     payload[0] = (payload[0][0], last_id)
+        # else:
+        #     if task.last_id != '0':
+        #         memcache.set(tag, task.last_id)
+        #         payload[0] = (payload[0][0], task.last_id)
+        # item = memcache.get(item_mc_key)
         if not item:
             res = requests.post(url, payload, headers=headers)
             j = res.json()
