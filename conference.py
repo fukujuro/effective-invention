@@ -305,7 +305,7 @@ class ConferenceApi(remote.Service):
                               'task_key': task.key.urlsafe()},
                       url='/tasks/collect_topic_tag')
         task.put_async()
-        return TaskForm(title=request.title, email=email, note=note)
+        return TaskForm(title=request.title, email=email)
 
 
     @endpoints.method(ConferenceForm, ConferenceForm, path='conference',
