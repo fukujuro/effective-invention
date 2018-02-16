@@ -303,8 +303,7 @@ class ConferenceApi(remote.Service):
         # note = self.addTaskTopic(task, request.title)
         taskqueue.add(params={'tag': request.title,
                               'task_key': task.key.urlsafe()},
-                      url='/tasks/collect_topic_tag',
-                      transactional=True)
+                      url='/tasks/collect_topic_tag')
         task.put_async()
         return TaskForm(title=request.title, email=email, note=note)
 
