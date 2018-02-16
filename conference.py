@@ -120,6 +120,7 @@ class TaskForm(messages.Message):
     title = messages.StringField(1)
     email = messages.StringField(2)
     note = messages.StringField(3)
+    task_key = messages.StringField(4)
 
 @endpoints.api(name='conference', version='v1', audiences=[ANDROID_AUDIENCE],
     allowed_client_ids=[WEB_CLIENT_ID, API_EXPLORER_CLIENT_ID, ANDROID_CLIENT_ID, IOS_CLIENT_ID],
